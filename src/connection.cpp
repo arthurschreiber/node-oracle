@@ -246,6 +246,10 @@ void Connection::CreateColumnsFromResultSet(oracle::occi::ResultSet* rs, std::ve
     oracle::occi::MetaData metadata = *iterator;
     column_t* col = new column_t();
     col->name = metadata.getString(oracle::occi::MetaData::ATTR_NAME);
+
+    // Always lowercase column names.
+    std::transform(col->name.begin(), col->name.end(), col->name.begin(), ::tolower);
+
     int type = metadata.getInt(oracle::occi::MetaData::ATTR_DATA_TYPE);
     col->charForm = metadata.getInt(oracle::occi::MetaData::ATTR_CHARSET_FORM);
     switch(type) {
