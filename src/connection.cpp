@@ -373,6 +373,7 @@ void Connection::EIO_Execute(uv_work_t* req) {
   oracle::occi::ResultSet* rs = NULL;
   try {
     stmt = baton->connection->m_connection->createStatement(baton->sql);
+    stmt->setPrefetchRowCount(100);
     stmt->setAutoCommit(baton->connection->m_autoCommit);
     int outputParam = SetValuesOnStatement(stmt, baton->values);
 
