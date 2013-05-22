@@ -8,6 +8,7 @@ Persistent<FunctionTemplate> OracleClient::s_ct;
 struct connect_baton_t {
   OracleClient* client;
   Persistent<Function> callback;
+  std::string connectionStr;
   std::string hostname;
   std::string user;
   std::string password;
@@ -60,6 +61,7 @@ Handle<Value> OracleClient::Connect(const Arguments& args) {
   baton->callback = Persistent<Function>::New(callback);
   baton->environment = client->m_environment;
 
+  OBJ_GET_STRING(settings, "connection", baton->connectionStr);
   OBJ_GET_STRING(settings, "hostname", baton->hostname);
   OBJ_GET_STRING(settings, "user", baton->user);
   OBJ_GET_STRING(settings, "password", baton->password);
@@ -82,6 +84,11 @@ void OracleClient::EIO_Connect(uv_work_t* req) {
 
   try {
     std::ostringstream connectionStr;
+    if (baton->connectionStr.length() != 0) {
+        connectionStr << baton->connectionStr;
+    } else {
+        connectionStr << "//" << baton->hostname << ":" << baton->port << "/" << baton->database;
+    }
     connectionStr << "//" << baton->hostname << ":" << baton->port << "/" << baton->database;
     baton->connection = baton->environment->createConnection(baton->user, baton->password, connectionStr.str());
   } catch(oracle::occi::SQLException &ex) {
